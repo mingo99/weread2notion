@@ -1,32 +1,21 @@
 import argparse
+import hashlib
 import json
 import logging
 import os
 import re
 import time
-from notion_client import Client
-import requests
-from requests.utils import cookiejar_from_dict
-from http.cookies import SimpleCookie
 from datetime import datetime
-import hashlib
+from http.cookies import SimpleCookie
+
+import requests
 from dotenv import load_dotenv
-import os
-from utils import (
-    get_callout,
-    get_date,
-    get_file,
-    get_heading,
-    get_icon,
-    get_multi_select,
-    get_number,
-    get_quote,
-    get_rich_text,
-    get_select,
-    get_table_of_contents,
-    get_title,
-    get_url,
-)
+from notion_client import Client
+from requests.utils import cookiejar_from_dict
+from utils import (get_callout, get_date, get_file, get_heading, get_icon,
+                   get_multi_select, get_number, get_quote, get_rich_text,
+                   get_select, get_table_of_contents, get_title, get_url)
+
 load_dotenv()
 WEREAD_URL = "https://weread.qq.com/"
 WEREAD_NOTEBOOKS_URL = "https://i.weread.qq.com/user/notebooks"
@@ -136,7 +125,6 @@ def insert_to_notion(bookName, bookId, cover, sort, author, isbn, rating, catego
         "Author": get_rich_text(author),
         "Sort": get_number(sort),
         "Rating": get_number(rating),
-        "Cover": get_file(cover),
     }
     if categories != None:
         properties["Categories"] = get_multi_select(categories)
@@ -164,7 +152,7 @@ def insert_to_notion(bookName, bookId, cover, sort, author, isbn, rating, catego
 
     icon = get_icon(cover)
     # notion api 限制100个block
-    response = client.pages.create(parent=parent, icon=icon,cover=icon, properties=properties)
+    response = client.pages.create(parent=parent, icon=icon, cover=icon, properties=properties)
     id = response["id"]
     return id
 
@@ -418,12 +406,6 @@ if __name__ == "__main__":
             book = book.get("book")
             title = book.get("title")
             cover = book.get("cover").replace("/s_", "/t7_")
-            # print(cover)
-            # if book.get("author") == "公众号" and book.get("cover").endswith("/0"):
-            #     cover += ".jpg"
-            # if cover.startswith("http") and not cover.endswith(".jpg"):
-            #     path = download_image(cover)
-            #     cover = f"https://raw.githubusercontent.com/{os.getenv('REPOSITORY')}/{os.getenv('REF').split('/')[-1]}/{path}"
             bookId = book.get("bookId")
             author = book.get("author")
             categories = book.get("categories")
